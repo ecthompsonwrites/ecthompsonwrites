@@ -1,0 +1,233 @@
+```{r}
+#install.packages("devtools")
+library(devtools)
+#devtools::install_github("UrbanInstitute/urbnmapr")
+library(tidyverse)
+library(urbnmapr)
+library(readxl)
+library(writexl)
+
+newscensus <- read_excel("nc_ecosystem_oos_tv.xlsx")
+
+```
+
+
+```{r}
+nc_counties <- counties %>% 
+  filter(state_name == "North Carolina")
+```
+
+
+```{r}
+library(stringr)
+
+nc_counties <- nc_counties%>%
+      mutate_at("county_name", str_replace, " County", "")
+
+```
+
+
+```{r}
+newscensus$type <-
+newscensus$type <- newscensus$type %>% replace_na('digital')
+
+newscensus
+  
+```
+
+
+```{r}
+library(tidyverse)
+newscensus <- nc_ecosystem
+
+newscensus
+nc_counties <- nc_counties %>% 
+  mutate(across(where(is.character), tolower))
+
+newscensus<- newscensus %>% 
+  mutate(across(where(is.character), tolower))
+
+newscensus <- 
+  newscensus %>% 
+ group_by(county) %>% 
+  mutate(total_count = n())
+
+#newscensus <- rename(newscensus, county = "coverage area")
+
+nc_counties <- rename( nc_counties, county = "county_name")
+```
+
+
+```{r}
+newspaper_newscensus <- 
+   newscensus %>% 
+  group_by(`county`) %>% 
+    filter(type == "newspaper") %>% 
+  mutate(newspaper_count = n())
+ 
+ #newscensus <- left_join(newscensus, newspaper_newscensus)
+
+
+public_radio_census <-
+    newscensus %>% 
+  group_by(`county`) %>% 
+    filter(type == "public radio") %>% 
+  mutate(public_radio_count = n())
+
+public_tv_census <-
+    newscensus %>% 
+  group_by(`county`) %>% 
+    filter(type == "public tv") %>% 
+  mutate(public_tv_count = n())
+
+
+ 
+  commercial_tv_census <-
+    newscensus %>% 
+  group_by(`county`) %>% 
+    filter(type == "commercial tv") %>% 
+  mutate(commercial_tv_count = n())
+
+
+ commercial_radio_census <-
+    newscensus %>% 
+  group_by(`county`) %>% 
+    filter(type == "commercial radio") %>% 
+  mutate(commercial_radio_count = n())
+
+    
+    digital_census <-
+    newscensus %>% 
+  group_by(`county`) %>% 
+    filter(type == "digital") %>% 
+  mutate(digital_count = n())
+    
+```
+
+
+```{r}
+
+total_census_and_map <- right_join(newscensus, nc_counties) 
+
+total_census_and_map
+
+```
+
+
+
+
+
+```{r}
+#newscensusmap <- 
+total_census_and_map %>%
+   ggplot(aes(long, lat, group = group, fill = total_count)) +
+  geom_polygon(color = "black")  +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+ scale_fill_distiller(name="Number of News Outlets",  direction =1)+
+  labs(fill = "Number of News Outlets") +
+  theme_void()
+```
+
+#Mapping types:
+
+Newspaper
+
+```{r}
+newspaper_census_and_map <- right_join(newspaper_newscensus, nc_counties) 
+```
+
+```{r}
+
+newspaper_census_and_map%>%
+   ggplot(aes(long, lat, group = group, fill = newspaper_count,)) +
+  geom_polygon(color = "black")  +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+ scale_fill_distiller(name="Number of Newspapers",  direction =1)+
+  labs(fill = "Number of Newspapers") +
+  theme_void()
+```
+
+Commercial radio
+
+```{r}
+commercial_radio_census_and_map <- right_join(commercial_radio_census, nc_counties) 
+```
+
+```{r}
+
+commercial_radio_census_and_map%>%
+   ggplot(aes(long, lat, group = group, fill = commercial_radio_count,)) +
+  geom_polygon(color = "black")  +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+ scale_fill_distiller(name="Number of Commercial Radio Stations",  direction =1)+
+  labs(fill = "Number of Newspapers") +
+  theme_void()
+```
+Public radio
+
+```{r}
+public_radio_census_and_map <- right_join(public_radio_census, nc_counties) 
+```
+
+```{r}
+
+public_radio_census_and_map%>%
+   ggplot(aes(long, lat, group = group, fill = public_radio_count,)) +
+  geom_polygon(color = "black")  +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+ scale_fill_distiller(name="Number of Public Radio Stations",  direction =1)+
+  labs(fill = "Number of Newspapers") +
+  theme_void()
+```
+
+Public tv
+
+```{r}
+public_tv_census_and_map <- right_join(public_tv_census, nc_counties) 
+```
+
+```{r}
+
+public_tv_census_and_map%>%
+   ggplot(aes(long, lat, group = group, fill = public_tv_count,)) +
+  geom_polygon(color = "black")  +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+ scale_fill_distiller(name="Number of Public TV Stations",  direction =1)+
+  labs(fill = "Number of Newspapers") +
+  theme_void()
+```
+
+Commercial tv
+
+```{r}
+commercial_tv_census_and_map <- right_join(commercial_tv_census, nc_counties) 
+```
+
+```{r}
+
+commercial_tv_census_and_map%>%
+   ggplot(aes(long, lat, group = group, fill = commercial_tv_count,)) +
+  geom_polygon(color = "black")  +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+ scale_fill_distiller(name="Number of Commercial TV Stations",  direction =1)+
+  labs(fill = "Number of Newspapers") +
+  theme_void()
+```
+
+Digital
+
+```{r}
+digital_census_and_map <- 
+  right_join(digital_census, nc_counties) 
+```
+
+```{r}
+
+digital_census_and_map%>%
+   ggplot(aes(long, lat, group = group, fill = digital_count,)) +
+  geom_polygon(color = "black")  +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+ scale_fill_distiller(name="Number of Digital News Sites",  direction =1)+
+  labs(fill = "Number of Newspapers") +
+  theme_void()
+```
