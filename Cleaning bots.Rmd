@@ -65,6 +65,7 @@ shortened_finished_us_ip <- finished_us_ip %>%
 
 
 ```{r}
+##sort a wider range of states due to vpns or travel
 states_interest <- finished_us_ip %>% 
   filter(region %in% c("North Carolina", "Washington, D.C.", "Maryland", "Tennessee", "Georgia", "Indiana", "Texas"))
 
@@ -76,6 +77,7 @@ shortened_finished_us_ip <- states_interest %>%
 
 shortened_finished_us_ip
 
+#sort out obvious fake newsrooms
 sorted_states_interest <- states_interest %>% 
   filter(!Newsroom %in% c(
            "HDO",
