@@ -1,0 +1,108 @@
+---
+title: "Cleaning bots"
+output: html_document
+date: "2022-08-22"
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+```{r}
+diversity_audit_mess <- read_csv("diversity_audit_9_12.csv")
+```
+
+```{r}
+#install.packages("rgeolocate")
+library(rgeolocate)
+#install.packages("httr")
+library(httr)
+```
+
+```{r}
+diversity_audit_mess
+```
+## Can only do the following once per day
+```{r}
+#require(rgeolocate)
+ip_address <-   ip_info(diversity_audit_mess$`IP Address`, token = NULL)
+```
+
+
+```{r}
+diversity_with_location <- cbind(ip_address, diversity_audit_mess)
+
+diversity_with_location
+```
+
+```{r}
+nc_results <- diversity_with_location %>% 
+  filter(region == "North Carolina")
+```
+
+```{r}
+library(writexl)
+
+```
+
+```{r}
+write_xlsx(nc_results, "nc_diversity_audit.xlsx")
+```
+
+```{r}
+us_ip <- diversity_with_location %>% 
+  filter(country == "US")
+```
+
+```{r}
+finished_us_ip <- us_ip %>% 
+  filter(Finished == "TRUE")
+
+shortened_finished_us_ip <- finished_us_ip %>% 
+  select(city, region, "Name of newsroom where you work")
+```
+
+
+```{r}
+states_interest <- finished_us_ip %>% 
+  filter(region %in% c("North Carolina", "Washington, D.C.", "Maryland", "Tennessee", "Georgia", "Indiana", "Texas"))
+
+states_interest <- states_interest %>% 
+rename(Newsroom ="Name of newsroom where you work")
+
+shortened_finished_us_ip <- states_interest %>% 
+  select(city, region, "Newsroom", "Duration (in seconds)")
+
+shortened_finished_us_ip
+
+sorted_states_interest <- states_interest %>% 
+  filter(!Newsroom %in% c(
+           "HDO",
+         "copy desk",
+         "Harpers School of Communication",
+         "Cadwalader, LLP",
+         "Hasmann.",
+         "North Carolina newsroom",
+        "U.S. Information Agency－USIA",
+        "888",
+        "Capital News",
+        "N.C. Newsroom Cooperative",
+        "Los Angeles Times",
+        "Washington Post",
+        "New York Times",
+        "HBO",
+        "CNN",
+        "Newsroom",
+        "newsroom",
+        "Don't want to tell", NA))
+```
+```{r}
+library(writexl)
+```
+ 
+```{r}
+write_xlsx(sorted_states_interest, "r_cleaned_diversity_9_12.xlsx")
+```
+
+
