@@ -77,28 +77,8 @@ shortened_finished_us_ip <- states_interest %>%
 
 shortened_finished_us_ip
 
-#sort out obvious fake newsrooms
-sorted_states_interest <- states_interest %>% 
-  filter(!Newsroom %in% c(
-           "HDO",
-         "copy desk",
-         "Harpers School of Communication",
-         "Cadwalader, LLP",
-         "Hasmann.",
-         "North Carolina newsroom",
-        "U.S. Information Agency－USIA",
-        "888",
-        "Capital News",
-        "N.C. Newsroom Cooperative",
-        "Los Angeles Times",
-        "Washington Post",
-        "New York Times",
-        "HBO",
-        "CNN",
-        "Newsroom",
-        "newsroom",
-        "Don't want to tell", NA))
 ```
+
 ```{r}
 library(writexl)
 ```
