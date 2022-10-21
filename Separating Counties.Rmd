@@ -1,0 +1,288 @@
+---
+title: "Separating Counties"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+date: "2022-06-23"
+---
+
+```{r}
+library("plyr")
+library("tidyverse")
+library(readxl)
+library(writexl)
+```
+
+## Import newspaper
+
+```{r}
+newspaper_separate <- read_excel('NC News Census.xlsx', 'NC Newspaper Database')
+```
+
+```{r}
+newspaper_separate %>% 
+  glimpse
+```
+
+## Separate out newspaper
+
+```{r}
+cleaned_newspaper_separate <- newspaper_separate %>% 
+  select(`coverage area`, 
+         city, 
+         outlet, 
+         state, 
+         url, 
+         "hq_county" = county,
+         "reporting_area" = `reporting area`)
+
+cleaned_newspaper_separate <- cleaned_newspaper_separate %>% 
+  add_column(type = "newspaper")
+```
+
+## Flip and rename coverage area
+```{r}
+
+newspaper_flipped_coverage <- cleaned_newspaper_separate %>% 
+ mutate(`coverage area` = strsplit(as.character(`coverage area`), ",")) %>% 
+    unnest(`coverage area`)
+```
+
+## Flip and rename reporting area
+```{r}
+
+newspaper_flipped_reporting <-cleaned_newspaper_separate %>% 
+ mutate(`reporting_area` = strsplit(as.character(`reporting_area`), ",")) %>% 
+    unnest(`reporting_area`)
+
+write_xlsx(newspaper_flipped_reporting, "newspaper_reporting.xlsx")
+```
+Digital startups, public radio, public tv, commercial radio, commercial tv
+
+```{r}
+digital_separate <- read_excel('NC News Census.xlsx', 'NC Digital Startups')
+```
+
+```{r}
+digital_separate %>% 
+  glimpse()
+```
+
+```{r}
+cleaned_digital_separate <- digital_separate %>% 
+  select("coverage area" = coverage_area, 
+         city = City,
+         outlet =`Publication Name`,
+         state = State,
+         url = URL,
+         hq_county = County)
+
+ cleaned_digital_separate <- cleaned_digital_separate %>% 
+  add_column(type = "digital")
+```
+
+```{r}
+
+digital_flipped <- cleaned_digital_separate %>% 
+ mutate(`coverage area` = strsplit(as.character(`coverage area`), ",")) %>% 
+    unnest(`coverage area`)
+```
+
+```{r}
+public_radio_separate <- read_excel('NC News Census.xlsx', 'Public Radio')
+```
+
+```{r}
+public_radio_separate %>% 
+  glimpse
+```
+
+```{r}
+cleaned_public_radio_separate <- public_radio_separate %>% 
+  select("coverage area" = coverage_area, 
+         city = City,
+         outlet =`Call Letters`,
+         url = URL,
+         "hq_county" = County)
+
+ cleaned_public_radio_separate <-  cleaned_public_radio_separate %>% 
+  add_column(type = "public radio",
+             state = "NC")
+```
+
+
+```{r}
+
+public_radio_flipped <- cleaned_public_radio_separate %>% 
+ mutate(`coverage area` = strsplit(as.character(`coverage area`), ";")) %>% 
+    unnest(`coverage area`)
+```
+
+```{r}
+public_tv_separate <- read_excel('NC News Census.xlsx', 'Public TV')
+```
+
+```{r}
+public_tv_separate %>% 
+  glimpse
+```
+
+```{r}
+ cleaned_public_tv_separate <- public_tv_separate %>% 
+  select("coverage area" = coverage_area, 
+         city = city,
+         outlet,
+         url,
+         "hq_county" = county)
+ cleaned_public_tv_separate <-  cleaned_public_tv_separate %>% 
+  add_column(type = "public tv")
+```
+
+
+```{r}
+
+public_tv_flipped <- cleaned_public_tv_separate %>% 
+ mutate(`coverage area` = strsplit(as.character(`coverage area`), ",")) %>% 
+    unnest(`coverage area`)
+```
+
+```{r}
+commercial_radio_separate <- read_excel('NC News Census.xlsx', 'Commercial Radio')
+```
+
+```{r}
+commercial_radio_separate %>% 
+  glimpse
+```
+
+```{r}
+  cleaned_commercial_radio_separate <- commercial_radio_separate %>% 
+  select("coverage area" = coverage_area.y, 
+         city,
+         outlet,
+         url,
+         "hq_county" = county)
+
+  cleaned_commercial_radio_separate <- cleaned_commercial_radio_separate %>% 
+  add_column(type = "commercial radio")
+```
+
+
+```{r}
+
+commercial_radio_flipped <-  cleaned_commercial_radio_separate %>% 
+ mutate(`coverage area` = strsplit(as.character(`coverage area`), ";")) %>% 
+    unnest(`coverage area`)
+```
+
+
+
+```{r}
+commercial_tv_separate <- read_excel('NC News Census.xlsx', 'Commercial TV')
+```
+
+```{r}
+commercial_tv_separate %>% 
+  glimpse
+```
+
+```{r}
+ cleaned_commercial_tv_separate <- commercial_tv_separate %>% 
+  select("coverage area" = coverage_area, 
+         city,
+         outlet,
+         url,
+         "hq_county" = county)
+  cleaned_commercial_tv_separate <- cleaned_commercial_tv_separate %>% 
+  add_column(type = "commercial tv")
+```
+
+
+```{r}
+
+ commercial_tv_flipped <- cleaned_commercial_tv_separate %>% 
+ mutate(`coverage area` = strsplit(as.character(`coverage area`), ",")) %>% 
+    unnest(`coverage area`)
+```
+
+## Merge everything together 
+
+```{r}
+nc_ecosystem <- rbind.fill(newspaper_flipped, public_radio_flipped, public_tv_flipped, commercial_radio_flipped, commercial_tv_flipped, digital_flipped)
+```
+
+## Write into excel
+```{r}
+write_xlsx(nc_ecosystem, "nc_ecosystem.xlsx")
+```
+
+```{r}
+commercial_radio_separate <- read_excel('NC News Census.xlsx', 'Commercial Radio')
+```
+
+```{r}
+commercial_radio_separate %>% 
+  glimpse
+```
+
+```{r}
+  cleaned_commercial_radio_separate <- commercial_radio_separate %>% 
+  select("coverage area" = coverage_area.y, 
+         city,
+         outlet,
+         url,
+         "hq_county" = county)
+
+  cleaned_commercial_radio_separate <- cleaned_commercial_radio_separate %>% 
+  add_column(type = "commercial radio")
+```
+
+
+```{r}
+
+commercial_radio_flipped <-  cleaned_commercial_radio_separate %>% 
+ mutate(`coverage area` = strsplit(as.character(`coverage area`), ";")) %>% 
+    unnest(`coverage area`)
+```
+
+
+
+```{r}
+college_media_separate <- read_excel('NC News Census.xlsx', 'College Media')
+```
+
+```{r}
+college_media_separate %>% 
+  glimpse
+```
+
+```{r}
+# cleaned_college_media_separate <- college_media_separate %>% 
+#select("coverage area" = coverage_area, 
+       #  "city" = `City 1`,
+        # "outlet" = Outlet,
+        # url,
+        # hq_county,
+         #type)
+```
+
+
+```{r}
+
+#college_media_flipped <- cleaned_college_media_separate %>% 
+ #mutate(`coverage area` = strsplit(as.character(`coverage area`), ";")) %>% 
+    #unnest(`coverage area`)
+```
+
+## Merge everything together 
+
+```{r}
+nc_ecosystem <- rbind.fill(newspaper_flipped, public_radio_flipped, public_tv_flipped, commercial_radio_flipped, commercial_tv_flipped, digital_flipped)
+```
+
+## Write into excel
+```{r}
+write_xlsx(nc_ecosystem, "nc_ecosystem.xlsx")
+```
+
