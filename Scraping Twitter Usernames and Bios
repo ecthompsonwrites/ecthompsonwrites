@@ -1,0 +1,59 @@
+#This is my original code, using the API part of Tweepy (lower certification)
+#getting connected to the twitter api
+import tweepy
+import webbrowser
+import time
+
+consumer_key = ""
+consumer_secret = ""
+
+callback_uri = "oob"
+
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret, callback_uri)
+
+redirect_url = auth.get_authorization_url()
+
+webbrowser.open(redirect_url)
+
+user_pin_input = input("What's the pin value? ") #this will change
+
+user_pin_input
+
+auth.get_access_token(user_pin_input) #access keys for this account
+
+api = tweepy.API(auth, wait_on_rate_limit = True) #now access to everything in tweepy API
+
+me = api.verify_credentials()
+
+print(me.screen_name)
+#all set up now!
+
+import pandas as pd
+pd.set_option('display.float_format', lambda x: '%.f' % x)
+
+#This is a dataset including a collection of twitter lists
+twitter_lists = pd.read_csv("Local News Twitter Lists.csv")
+twitter_lists
+
+twitter_lists["number"] = twitter_lists["number"].astype(str)
+numbers = list(twitter_lists["number"])
+numbers = [item.replace("''", "") for item in numbers]
+#numbers = [item.strip("''") for item in numbers]
+print(numbers)
+
+## This code works for smaller batches, about 100 lists at a time:
+result = []
+for number in numbers[:100]:
+    try:
+        df = pd.DataFrame({'screen_name': [member.screen_name for member in tweepy.Cursor(api.get_list_members,list_id = number).items()],
+                           'bio': [member.description for member in tweepy.Cursor(api.get_list_members,list_id = number).items()]})
+        result.append(df)
+    except:
+        pass
+
+len(result)    
+
+
+journo_info = pd.concat(result)
+
+journo_info.to_csv("journo_info_result.csv", index = False)
